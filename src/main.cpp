@@ -14,8 +14,18 @@
 #define SIGNAL_SIZE_DEFAULT 4
 
 CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0);
+CBooleanParameter enableAxi("EN_AXI", CBaseParameter::RW, false, 0);
+
 CFloatSignal signalTest("SIGNAL_TEST", SIGNAL_SIZE_DEFAULT, 0.0f);
+
+CFloatSignal input("ch1", SIGNAL_SIZE_DEFAULT, 0.0f);
+
+
 std::vector<float> g_data(SIGNAL_SIZE_DEFAULT);
+
+int dsize = SIGNAL_SIZE_DEFAULT;
+uint32_t dec = 1;
+uint32_t g_adc_axi_start, g_adc_axi_size;
 
 
 
@@ -32,6 +42,7 @@ int rp_app_init(void)
 {
     fprintf(stderr, "Loading template application\n");
     rp_Init();
+    rp_AxiInit();
     CDataManager::GetInstance()->SetSignalInterval(1000);
     //buf = rp_createBuffer(2, SIGNAL_SIZE_DEFAULT, false, false, true);
     return 0;
@@ -66,7 +77,30 @@ int rp_get_signals(float ***s, int *sig_num, int *sig_len)
 
 
 
-
+int rp_AxiInit()
+{
+	if (RP_OK != rp_AcqAxiGetMemoryRegion(&g_adc_axi_start, &g_adc_axi_size)
+	{
+		return -1;
+	}
+	if (RP_OK != rp_AcqAxiSetDecimationFactor(dec))
+	{
+		return -1;
+	}
+	if (RP_OK != rp_AcqAxiSetTriggerDelay(RP_CH_1, dsize))
+	{
+		return -1;
+	}
+	if(RP_OK != rp_AcqAxiSetBufferSamples(RP_CH_1, g_adc_start, dsize))
+	{
+		return -1;
+	}
+	if(RP_OK != rp_AcqAxiEnable(RP_CH_1, true))
+	{
+		return -1;
+	}
+	return RP_OK;
+}
 
 
 

@@ -22,6 +22,7 @@ CFloatSignal input("ch1", SIGNAL_SIZE_DEFAULT, 0.0f);
 
 
 std::vector<float> g_data(SIGNAL_SIZE_DEFAULT);
+std::vector<float> g_data2(SIGNAL_SIZE_DEFAULT);
 
 int dsize = SIGNAL_SIZE_DEFAULT;
 uint32_t dec = 1;
@@ -53,6 +54,7 @@ int rp_app_exit(void)
 {
     fprintf(stderr, "Unloading template application\n");
     //rp_deleteBuffer(buf);
+    rp_AcqAxiEnable(RP_CH_1, false);
     rp_Release();
     return 0;
 }
@@ -102,7 +104,22 @@ int rp_AxiInit()
 	return RP_OK;
 }
 
+void test_AXI()
+{
 
+	uint32_t pos;
+	
+	rp_AcqStart();
+	rp_AcqStop();
+	rp_AcqAxiGetWritePointerAtTrig(RP_CH_1, &pos);
+	int16_t *buff = (int16_t*)malloc(dsize * sizeof(int16_t));
+	uint32_t size = dsize;
+	rp_AcqAxiGetDataRaw(RP_CH_1, pos, &size, buff);
+	for(int i = 0; i < SIGNAL_SIZE_DEFAULT; i++)
+	{
+		g_data2[i] = buff[i];
+	}
+}
 
 
 void UpdateSignals(void){
@@ -114,7 +131,11 @@ void UpdateSignals(void){
 	signalTest[1] = g_data[1];
 	signalTest[2] = 2.0f;
 	signalTest[3] = 3.0f;
-		
+	
+	for (int i = 0; i < SIGNAL_SIZE_DEFAULT; i++)
+	{
+		input[i] = g_data2[i];
+	}
 }
 
 
@@ -125,6 +146,8 @@ void UpdateParams(void){
 	rp_DpinSetState(RP_LED0, RP_LOW);
 	g_data[0] = 0.0f;
 	//rp_AcqStop();
+	test_AXI();
+	//doit changer une variable local au prog pour actionner la prise de données dans UpdateSignals
    }
    else
    {

@@ -112,9 +112,9 @@ void test_AXI()
 	rp_AcqStart();
 	rp_AcqStop();
 	rp_AcqAxiGetWritePointerAtTrig(RP_CH_1, &pos);
-	int16_t *buff = (int16_t*)malloc(dsize * sizeof(int16_t));
+	float *buff = (float*)malloc(dsize * sizeof(float));
 	uint32_t size = dsize;
-	rp_AcqAxiGetDataRaw(RP_CH_1, pos, &size, buff);
+	rp_AcqAxiGetDataV(RP_CH_1, pos, &size, buff);
 	for(int i = 0; i < SIGNAL_SIZE_DEFAULT; i++)
 	{
 		g_data2[i] = buff[i];

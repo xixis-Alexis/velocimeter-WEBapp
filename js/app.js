@@ -20,7 +20,7 @@
     APP.start_acq = false;
     APP.SIGNAL = [];
     APP.plot = "";
-
+    APP.graph = [];
     // Starts template application on server
     APP.startApp = function() {
 
@@ -97,6 +97,19 @@
 	var voltage;
 	var text = "";
 	for (sig_name in new_signals){	
+		if (sig_name == 'ch1'){
+			text = "";
+			APP.graph.pop();
+			APP.graph.push(new_signals['ch1']); 
+/*il faut faire un stack puis a un autre 
+endroit faire une action sur les données */
+			for (let i = 0; i < new_signals['ch1'].size; i++){
+				voltage = new_signals['ch1'].value[i];
+				text = text + " " + String(voltage); 
+			}
+			$('#DATA').text(text);
+			text = "";
+			console.log(APP.graph);}else{
 		if (new_signals[sig_name].size > 0){
 			for (let i = 0; i < new_signals[sig_name].size; i++){
 				voltage = new_signals[sig_name].value[i];
@@ -106,7 +119,7 @@
 			//$('#AFF_int').text(parseFloat(voltage).toFixed(2));}
 			$('#AFF_int').text(text);}
 			console.log(text);
-		}
+		}}
 	}
 
    APP.signalHandler = function(){

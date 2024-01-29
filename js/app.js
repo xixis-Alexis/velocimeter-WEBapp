@@ -93,6 +93,7 @@
     };
 
    APP.processSignals = function(new_signals){
+	//il faudrait faire une methode pour l'affichage de données
 	var pointArr = [];
 	var voltage;
 	var text = "";

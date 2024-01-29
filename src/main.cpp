@@ -13,25 +13,24 @@
 
 #define SIGNAL_SIZE_DEFAULT 4
 
-CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0);
-CBooleanParameter enableAxi("EN_AXI", CBaseParameter::RW, false, 0);
+CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0); //parametre pour lancer une ACQ
+CBooleanParameter enableAxi("EN_AXI", CBaseParameter::RW, false, 0); //inutile : parametre pour utiliser l'AXI 
 
-CFloatSignal signalTest("SIGNAL_TEST", SIGNAL_SIZE_DEFAULT, 0.0f);
+CFloatSignal signalTest("SIGNAL_TEST", SIGNAL_SIZE_DEFAULT, 0.0f); //Signal de test
 
-CFloatSignal input("ch1", SIGNAL_SIZE_DEFAULT, 0.0f);
-
-
-std::vector<float> g_data(SIGNAL_SIZE_DEFAULT);
-std::vector<float> g_data2(SIGNAL_SIZE_DEFAULT);
-
-int dsize = SIGNAL_SIZE_DEFAULT;
-uint32_t dec = 1;
-uint32_t g_adc_axi_start, g_adc_axi_size;
+CFloatSignal input("ch1", SIGNAL_SIZE_DEFAULT, 0.0f); //Signal avec les données ACQ
 
 
+std::vector<float> g_data(SIGNAL_SIZE_DEFAULT); //Vecteur de test
+std::vector<float> g_data2(SIGNAL_SIZE_DEFAULT); //Vecteur de données
 
-uint32_t pos;
-buffers_t* buf;
+/*	variables globales	*/
+int dsize = SIGNAL_SIZE_DEFAULT;		//taille du buffer
+uint32_t dec = 1; 				//variable globale de decimation
+uint32_t g_adc_axi_start, g_adc_axi_size; 	//addr de debut de buffer axi, taille total du buffer axi
+
+uint32_t pos;		//position du pointeur d'ecriture
+buffers_t* buf;		//pointeur sur le buffeur
 
 const char *rp_app_desc(void)
 {
@@ -44,7 +43,7 @@ int rp_app_init(void)
     fprintf(stderr, "Loading template application\n");
     rp_Init();
     rp_AxiInit();
-    CDataManager::GetInstance()->SetSignalInterval(1000);
+    CDataManager::GetInstance()->SetSignalInterval(1000); //Cadence d'actualisation du signal à 1sec
     //buf = rp_createBuffer(2, SIGNAL_SIZE_DEFAULT, false, false, true);
     return 0;
 }
@@ -79,7 +78,8 @@ int rp_get_signals(float ***s, int *sig_num, int *sig_len)
 
 
 
-int rp_AxiInit()
+int rp_AxiInit()	//INitialise l'AXI
+			//A securiser
 {
 	if (RP_OK != rp_AcqAxiGetMemoryRegion(&g_adc_axi_start, &g_adc_axi_size))
 	{
@@ -104,7 +104,10 @@ int rp_AxiInit()
 	return RP_OK;
 }
 
-void test_AXI()
+
+void test_AXI()		//function pour tester l'axi
+			//ACQ un certain nombre de données, puis les places dans le vecteur de donnéees
+			//A modifier : Arret au remplicage du buffer
 {
 
 	uint32_t pos;
@@ -146,7 +149,6 @@ void UpdateParams(void){
 	rp_DpinSetState(RP_LED0, RP_LOW);
 	g_data[0] = 0.0f;
 	//rp_AcqStop();
-	test_AXI();
 	//doit changer une variable local au prog pour actionner la prise de données dans UpdateSignals
    }
    else
@@ -154,6 +156,7 @@ void UpdateParams(void){
 	rp_DpinSetState(RP_LED0, RP_HIGH);
 	g_data[0] = 1.0f;
    	//rp_AcqStart();
+	test_AXI()
    }
 }
 

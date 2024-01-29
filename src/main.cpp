@@ -11,7 +11,7 @@
 #include <DataManager.h>
 #include <CustomParameters.h>
 
-#define SIGNAL_SIZE_DEFAULT 4
+#define SIGNAL_SIZE_DEFAULT 16
 
 CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0); //parametre pour lancer une ACQ
 CBooleanParameter enableAxi("EN_AXI", CBaseParameter::RW, false, 0); //inutile : parametre pour utiliser l'AXI 
@@ -156,7 +156,7 @@ void UpdateParams(void){
 	rp_DpinSetState(RP_LED0, RP_HIGH);
 	g_data[0] = 1.0f;
    	//rp_AcqStart();
-	test_AXI()
+	test_AXI();
    }
 }
 

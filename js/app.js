@@ -10,7 +10,7 @@
     
     // App configuration
     APP.config = {};
-    APP.config.app_id = 'myFirstApp';
+    APP.config.app_id = 'velocimeter-WEBapp';
     APP.config.app_url = '/bazaar?start=' + APP.config.app_id + '?' + location.search.substr(1);
     APP.config.socket_url = 'ws://' + window.location.hostname + ':9002';
 
@@ -84,7 +84,7 @@
 			var text = String.fromCharCode.apply(null, new Uint8Array(inflate));
 			var receive = JSON.parse(text);
 			if(receive.signals){APP.SIGNAL.push(receive.signals)}
-			console.log(receive.signals)
+			console.log(receive)
 		}catch(e){
 			console.log(e)
 		}
@@ -95,13 +95,17 @@
    APP.processSignals = function(new_signals){
 	var pointArr = [];
 	var voltage;
-	for (sig_name in new_signals){
-	
-	
+	var text = "";
+	for (sig_name in new_signals){	
 		if (new_signals[sig_name].size > 0){
-			voltage = new_signals[sig_name].value[0];
-			$('#AFF_int').text(parseFloat(voltage).toFixed(2));}
-			console.log(voltage);
+			for (let i = 0; i < new_signals[sig_name].size; i++){
+				voltage = new_signals[sig_name].value[i];
+				text = text + " " + String(voltage);
+			}
+			//voltage = new_signals[sig_name].value[0];
+			//$('#AFF_int').text(parseFloat(voltage).toFixed(2));}
+			$('#AFF_int').text(text);}
+			console.log(text);
 		}
 	}
 
@@ -113,7 +117,7 @@
 	if(APP.SIGNAL.length > 2)
 		APP.SIGNAL.length = [];
    }
-	setInterval(APP.signalHandler, 15);
+	setInterval(APP.signalHandler, 15); //1sec
 
 }(window.APP = window.APP || {}, jQuery));
 

@@ -79,7 +79,7 @@ int rp_get_signals(float ***s, int *sig_num, int *sig_len)
 
 int rp_AxiInit()
 {
-	if (RP_OK != rp_AcqAxiGetMemoryRegion(&g_adc_axi_start, &g_adc_axi_size)
+	if (RP_OK != rp_AcqAxiGetMemoryRegion(&g_adc_axi_start, &g_adc_axi_size))
 	{
 		return -1;
 	}
@@ -91,7 +91,7 @@ int rp_AxiInit()
 	{
 		return -1;
 	}
-	if(RP_OK != rp_AcqAxiSetBufferSamples(RP_CH_1, g_adc_start, dsize))
+	if(RP_OK != rp_AcqAxiSetBufferSamples(RP_CH_1, g_adc_axi_start, dsize))
 	{
 		return -1;
 	}

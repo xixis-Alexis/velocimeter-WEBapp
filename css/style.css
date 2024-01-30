@@ -2,10 +2,11 @@ html,
 body {
     width: 100%;
     height: 100%;
+    color: #cdcccc;
 }
 
 body {
-    color: #cdcccc;
+    background-color : #333333;
     overflow: auto;
     margin: 0;
 }

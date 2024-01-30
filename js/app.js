@@ -20,10 +20,11 @@
     APP.start_acq = false;
     APP.SIGNAL = [];
     APP.plot = "";
-    APP.graph = [];
-    // Starts template application on server
-    APP.startApp = function() {
+    APP.graph = {};
+    APP.graph.data = [];
 
+    // Starts template application on server
+    APP.startApp = function() {		
         $.get(APP.config.app_url)
             .done(function(dresult) {
                 if (dresult.status == 'OK') {
@@ -100,17 +101,19 @@
 	for (sig_name in new_signals){	
 		if (sig_name == 'ch1'){
 			text = "";
-			APP.graph.pop();
-			APP.graph.push(new_signals['ch1']); 
+			APP.graph.data.pop();
+			//APP.graph.data.push(new_signals['ch1']); 
 /*il faut faire un stack puis a un autre 
 endroit faire une action sur les données */
 			for (let i = 0; i < new_signals['ch1'].size; i++){
 				voltage = new_signals['ch1'].value[i];
-				text = text + " " + String(voltage); 
+				text = text + " " + String(voltage);
+				pointArr.push([i, voltage]); 
 			}
+			APP.graph.data.push(pointArr);
 			$('#DATA').text(text);
 			text = "";
-			console.log(APP.graph);}else{
+			console.log(APP.graph.data);}else{
 		if (new_signals[sig_name].size > 0){
 			for (let i = 0; i < new_signals[sig_name].size; i++){
 				voltage = new_signals[sig_name].value[i];
@@ -121,6 +124,11 @@ endroit faire une action sur les données */
 			$('#AFF_int').text(text);}
 			console.log(text);
 		}}
+		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:1, min:-1}});
+		console.log([APP.graph.data]);
+		APP.graph.plot.resize();
+		APP.graph.plot.setupGrid();
+		APP.graph.plot.draw();
 	}
 
    APP.signalHandler = function(){

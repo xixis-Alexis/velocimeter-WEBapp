@@ -158,11 +158,11 @@ endroit faire une action sur les données */
     APP.processParams = function(new_state){
 	for (param in new_state){
 		if(param == 'DEC')
-			APP.param.state.dec = new_state[param].value();
+			APP.param.state.dec = new_state[param].value[0];
 		if(param == 'DURATION')
-			APP.param.state.duration = new_state[param].value();
+			APP.param.state.duration = new_state[param].value[0];
 		if(param == 'START_ACQ')
-			APP.param.state.start_acq = new_state[param].value();
+			APP.param.state.start_acq = new_state[param].value[0];
 	}
     }
 

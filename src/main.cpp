@@ -13,11 +13,12 @@
 
 #define SIGNAL_SIZE_DEFAULT 16
 
-CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0); //parametre pour lancer une ACQ
-CBooleanParameter enableAxi("EN_AXI", CBaseParameter::RW, false, 0); //inutile : parametre pour utiliser l'AXI 
+CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0); //parametre pour lancer une ACQ 
+CUIntParameter decParameter("DEC", CBaseParameter::RW, 1, 0, 1, 2);
+CUIntParameter durParameter("DURATION", CBaseParameter::RW, 0, 0, 0, 1000);
+
 
 CFloatSignal signalTest("SIGNAL_TEST", SIGNAL_SIZE_DEFAULT, 0.0f); //Signal de test
-
 CFloatSignal input("ch1", SIGNAL_SIZE_DEFAULT, 0.0f); //Signal avec les données ACQ
 
 
@@ -28,6 +29,7 @@ std::vector<float> g_data2(SIGNAL_SIZE_DEFAULT); //Vecteur de données
 int dsize = SIGNAL_SIZE_DEFAULT;		//taille du buffer
 uint32_t dec = 1; 				//variable globale de decimation
 uint32_t g_adc_axi_start, g_adc_axi_size; 	//addr de debut de buffer axi, taille total du buffer axi
+uint32_t duration = 0;
 
 uint32_t pos;		//position du pointeur d'ecriture
 buffers_t* buf;		//pointeur sur le buffeur
@@ -144,6 +146,12 @@ void UpdateSignals(void){
 
 void UpdateParams(void){
    startAcq.Update();
+   decParameter.Update();
+   durParameter.Update();
+   dec = decParameter.Value(); //change la valeur de decimation
+	//à placer dans une fonction
+   duration = durParameter.Value();
+
    if(startAcq.Value() == false)
    {
 	rp_DpinSetState(RP_LED0, RP_LOW);

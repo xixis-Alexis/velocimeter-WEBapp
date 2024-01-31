@@ -17,17 +17,30 @@
     // WebSocket
     APP.ws = null;
 
-    APP.start_acq = false;
+    APP.param = {}; //ordre pour l'oscilloscope
+    APP.param.start_acq = false;
+    APP.param.dec = 1;
+    APP.param.duration = 0;
+
+    APP.param.state = {}; //etat de l'oscilloscope
+    APP.param.state.start_acq = undefined;
+    APP.param.state.dec = undefined;
+    APP.param.state.duration = undefined;
+
+    APP.paramStack = []; //pile
+
     APP.SIGNAL = [];
-    APP.plot = "";
     APP.graph = {};
     APP.graph.data = [];
+    APP.signalStack = []; //pile
+
+    APP.processing = false;
 
     // Starts template application on server
     APP.startApp = function() {		
         $.get(APP.config.app_url)
             .done(function(dresult) {
-                if (dresult.status == 'OK') {
+                if (dresult.status == 'OK'){
                     APP.connectWebSocket();
                 } else if (dresult.status == 'ERROR') {
                     console.log(dresult.reason ? dresult.reason : 'Could not start the application (ERR1)');
@@ -41,10 +54,8 @@
                 console.log('Could not start the application (ERR3)');
                 APP.startApp();
             });
+	
     };
-
-
-
 
     APP.connectWebSocket = function() {
 
@@ -84,14 +95,17 @@
 			var inflate = pako.inflate(data);
 			var text = String.fromCharCode.apply(null, new Uint8Array(inflate));
 			var receive = JSON.parse(text);
-			if(receive.signals){APP.SIGNAL.push(receive.signals)}
+			if(receive.signals){APP.signalStack.push(receive.signals);}
 			console.log(receive)
+			if(receive.parameters){APP.paramStack.push(receive.parameters);}
+			//etat de l'oscilloscope
 		}catch(e){
 			console.log(e)
 		}
             };
         }
     };
+
 
    APP.processSignals = function(new_signals){
 	//il faudrait faire une methode pour l'affichage de données
@@ -132,14 +146,42 @@ endroit faire une action sur les données */
 	}
 
    APP.signalHandler = function(){
-	if (APP.SIGNAL.length > 0)
+	if (APP.signalStack.length > 0)
 	{
-		APP.processSignals(APP.SIGNAL[0]);
+		APP.processSignals(APP.signalStack[0]);
 	}
-	if(APP.SIGNAL.length > 2)
-		APP.SIGNAL.length = [];
+	if(APP.signalStack.length > 2)
+		APP.signalStack.length = [];
    }
-	setInterval(APP.signalHandler, 15); //1sec
+   setInterval(APP.signalHandler, 15); 
+
+    APP.processParams = function(new_state){
+	for (param in new_state){
+		if(param == 'DEC')
+			APP.param.state.dec = new_state[param].value();
+		if(param == 'DURATION')
+			APP.param.state.duration = new_state[param].value();
+		if(param == 'START_ACQ')
+			APP.param.state.start_acq = new_state[param].value();
+	}
+    }
+
+    APP.parameterHandler = function(){
+	
+	//var local2 = {};
+	//local2['DEC'] = { value : APP.param.start_acq };
+	//local2['DURATION'] = { value : APP.param.duration };
+	//local['START_ACQ'] = { value: APP.param.start_acq};
+	//if (APP.ws)
+	//	APP.ws.send(JSON.stringify({ parameters: local2}));
+	if(APP.paramStack.length > 0)
+	{
+		APP.processParams(APP.paramStack[0]);
+	}
+	if(APP.paramStack.length > 2)
+		APP.paramStack.length = [];
+    }
+    setInterval(APP.parameterHandler, 15);
 
 }(window.APP = window.APP || {}, jQuery));
 
@@ -149,16 +191,16 @@ endroit faire une action sur les données */
 // Page onload event handler
 $(function() {
     $('#start_acq').click(function(){
-        if(APP.start_acq == false){
-                APP.start_acq = true;
+        if(APP.param.start_acq == false){
+                APP.param.start_acq = true;
                 $('#AFF').text("TRUE");
         }else{
-                APP.start_acq = false;
+                APP.param.start_acq = false;
                 $('#AFF').text("FALSE");
         }
 
         var local = {};
-        local['START_ACQ'] = { value: APP.start_acq };
+        local['START_ACQ'] = { value: APP.param.start_acq };
         APP.ws.send(JSON.stringify({parameters: local}));
    });
 

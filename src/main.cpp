@@ -11,7 +11,7 @@
 #include <DataManager.h>
 #include <CustomParameters.h>
 
-#define SIGNAL_SIZE_DEFAULT 16
+#define SIGNAL_SIZE_DEFAULT 1024
 
 CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0); //parametre pour lancer une ACQ 
 CIntParameter decParameter("DEC", CBaseParameter::RW, 1, 0, 1, 60000);

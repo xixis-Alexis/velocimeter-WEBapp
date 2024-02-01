@@ -133,14 +133,15 @@ endroit faire une action sur les données */
 		if (new_signals[sig_name].size > 0){
 			for (let i = 0; i < new_signals[sig_name].size; i++){
 				voltage = new_signals[sig_name].value[i];
-				text = text + " " + String(voltage);
+				if (i <= 5)
+					text = text + " " + String(voltage);
 			}
 			//voltage = new_signals[sig_name].value[0];
 			//$('#AFF_int').text(parseFloat(voltage).toFixed(2));}
 			$('#AFF_int').text(text);}
 			//console.log(text);
 		}}
-		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:1, min:-1}});
+		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:0.001, min:-0.001}});
 		//console.log([APP.graph.data]);
 		APP.graph.plot.resize();
 		APP.graph.plot.setupGrid();
@@ -309,7 +310,7 @@ $(function() {
 		//local['START_ACQ'] = {value : APP.param.start_acq};
 		//APP.ws.send(JSON.stringify({parameters: local}));
         });*/
-
+    $('#DATA').hide();
     APP.GUI();
     // Start application
     APP.startApp();

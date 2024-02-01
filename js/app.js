@@ -32,6 +32,8 @@
 
     APP.SIGNAL = [];
     APP.graph = {};
+    APP.graph.max = 1;
+    APP.graph.min = -1;
     APP.graph.data = [];
     APP.signalStack = []; //pile
 
@@ -141,7 +143,7 @@ endroit faire une action sur les données */
 			$('#AFF_int').text(text);}
 			//console.log(text);
 		}}
-		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:0.001, min:-0.001}});
+		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:APP.graph.max, min:APP.graph.min}});
 		//console.log([APP.graph.data]);
 		APP.graph.plot.resize();
 		APP.graph.plot.setupGrid();
@@ -271,6 +273,29 @@ endroit faire une action sur les données */
 		//A securiser
 		APP.param.duration = $('#duration').val();
 		console.log("Change detected");
+	});
+
+	$('#zoom_plus').on("click", function(){
+		console.log("####### ZOOM + ######");
+		let yaxis_ax = APP.graph.plot.getAxes().yaxis;
+		console.log(yaxis_ax);
+		APP.graph.max = yaxis_ax.max/10;
+		APP.graph.min = yaxis_ax.min/10;
+		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:yaxis_ax.max/10, min:yaxis_ax.min/10}});
+		APP.graph.plot.resize();
+		APP.graph.plot.setupGrid();
+		APP.graph.plot.draw();
+	});
+
+	$('#zoom_minus').on("click", function(){
+		console.log("###### ZOOM - ######");
+		let yaxis_ax = APP.graph.plot.getAxes().yaxis;
+		APP.graph.max = yaxis_ax.max*10;
+		APP.graph.min = yaxis_ax.min*10;
+		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:APP.graph.max, min:APP.graph.min}});
+		APP.graph.plot.resize();
+		APP.graph.plot.setupGrid();
+		APP.graph.plot.draw();
 	});
    }
 

@@ -115,14 +115,15 @@ void test_AXI()		//function pour tester l'axi
 {
 
 	uint32_t pos;
-	
+	rp_AcqAxiSetBufferSamples(RP_CH_1, g_adc_axi_start, durParameter.Value());
 	rp_AcqStart();
 	rp_AcqStop();
 	rp_AcqAxiGetWritePointerAtTrig(RP_CH_1, &pos);
-	float *buff = (float*)malloc(dsize * sizeof(float));
-	uint32_t size = dsize;
+	float *buff = (float*)malloc(durParameter.Value() * sizeof(float));
+	uint32_t size = durParameter.Value();
 	rp_AcqAxiGetDataV(RP_CH_1, pos, &size, buff);
-	for(int i = 0; i < SIGNAL_SIZE_DEFAULT; i++)
+	g_data2.resize(size);
+	for(int i = 0; i < durParameter.Value(); i++)
 	{
 		g_data2[i] = buff[i];
 	}
@@ -140,7 +141,10 @@ void UpdateSignals(void){
 	signalTest[2] = float(durParameter.Value());
 	signalTest[3] = g_data[2];
 	
-	for (int i = 0; i < SIGNAL_SIZE_DEFAULT; i++)
+
+	//changer la taille de input
+	input.Resize(durParameter.Value());
+	for (int i = 0; i < durParameter.Value(); i++)
 	{
 		input[i] = g_data2[i];
 	}
@@ -157,6 +161,10 @@ void UpdateParams(void){
 	g_data[2] = 0;
 	}
    durParameter.Update();
+   if(durParameter.Value() == 0 || durParameter.Value() > 1024){
+	durParameter.Set(1024);
+	durParameter.Update();
+   }
    //dec = decParameter.Value(); //change la valeur de decimation
 	//à placer dans une fonction
    //duration = durParameter.Value();

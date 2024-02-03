@@ -118,14 +118,21 @@
 	for (sig_name in new_signals){	
 		if (sig_name == 'ch1'){
 			text = "";
-			APP.graph.data.pop();
+			//if(!APP.processing)
+				APP.graph.data.pop();
 			//APP.graph.data.push(new_signals['ch1']); 
 /*il faut faire un stack puis a un autre 
 endroit faire une action sur les données */
 			for (let i = 0; i < new_signals['ch1'].size; i++){
 				voltage = new_signals['ch1'].value[i];
 				text = text + " " + String(voltage);
-				pointArr.push([i, voltage]); 
+			//	if(pointArr.length < APP.param.duration){
+					pointArr.push([i, voltage]); 
+			//	}else{
+			//		APP.processing = false;
+			//	}
+				if(pointArr.length > APP.param.duration)
+					APP.processing = false;
 			}
 			APP.graph.data.push(pointArr);
 			$('#DATA').text(text);
@@ -143,6 +150,8 @@ endroit faire une action sur les données */
 			$('#AFF_int').text(text);}
 			//console.log(text);
 		}}
+		console.log(APP.graph.data.length)
+		console.log(APP.processing)
 		APP.graph.plot = $.plot($("#placeholder"), [APP.graph.data[0] ], {yaxis:{max:APP.graph.max, min:APP.graph.min}});
 		//console.log([APP.graph.data]);
 		APP.graph.plot.resize();
@@ -255,6 +264,7 @@ endroit faire une action sur les données */
 			$('#AFF').text('TRUE')
 			APP.param.start_acq = true;
 			//APP.setStart();
+			APP.processing = true;
 		}else{
 			$('#AFF').text('FALSE');
 			APP.param.start_acq = false;

@@ -142,7 +142,7 @@ endroit faire une action sur les données */
 		if (new_signals[sig_name].size > 0){
 			for (let i = 0; i < new_signals[sig_name].size; i++){
 				voltage = new_signals[sig_name].value[i];
-				if (i <= 5)
+				if (i <= 7)
 					text = text + " " + String(voltage);
 			}
 			//voltage = new_signals[sig_name].value[0];
@@ -191,6 +191,7 @@ endroit faire une action sur les données */
 		return false;
 	}
 	console.log(local);
+	
 	APP.ws.send(JSON.stringify({ parameters: local}));
 	//console.log("Params sent");
     }

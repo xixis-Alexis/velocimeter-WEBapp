@@ -12,10 +12,11 @@
 #include <CustomParameters.h>
 
 #define SIGNAL_SIZE_DEFAULT 1024
+#define SIGNAL_SIZE_MAX 2048
 
 CBooleanParameter startAcq("START_ACQ", CBaseParameter::RW, false, 0); //parametre pour lancer une ACQ 
 CIntParameter decParameter("DEC", CBaseParameter::RW, 1, 0, 1, 60000);
-CIntParameter durParameter("DURATION", CBaseParameter::RW, 0, 0, 0, 1000);
+CIntParameter durParameter("DURATION", CBaseParameter::RW, 0, 0, 0, 10000);
 
 
 CFloatSignal signalTest("SIGNAL_TEST", SIGNAL_SIZE_DEFAULT, 0.0f); //Signal de test
@@ -44,7 +45,10 @@ int rp_app_init(void)
 {
     fprintf(stderr, "Loading template application\n");
     rp_Init();
-    rp_AxiInit();
+    if (RP_OK != rp_AxiInit()){
+	g_data[4] = float(-1);
+	return -1;	
+    }
     CDataManager::GetInstance()->SetSignalInterval(1000); //Cadence d'actualisation du signal à 1sec
     //buf = rp_createBuffer(2, SIGNAL_SIZE_DEFAULT, false, false, true);
     CDataManager::GetInstance()->SetParamInterval(1000);
@@ -57,7 +61,6 @@ int rp_app_exit(void)
     fprintf(stderr, "Unloading template application\n");
     //rp_deleteBuffer(buf);
     rp_AcqAxiEnable(RP_CH_1, false);
-    free(buf);
     rp_Release();
     return 0;
 }
@@ -114,12 +117,30 @@ void test_AXI()		//function pour tester l'axi
 			//A modifier : Arret au remplicage du buffer
 {
 
+	g_data[3] = float(g_adc_axi_size);
 	uint32_t pos;
-	rp_AcqAxiSetBufferSamples(RP_CH_1, g_adc_axi_start, durParameter.Value());
+	bool fillstate;
+	if (RP_OK != rp_AcqAxiSetTriggerDelay(RP_CH_1, durParameter.Value())){
+		g_data[5] = float(-1);
+	}
+	if (RP_OK != rp_AcqAxiSetBufferSamples(RP_CH_1, g_adc_axi_start, durParameter.Value())){
+		g_data[5] = float(-1);
+	}
+	rp_AcqSetTriggerSrc(RP_TRIG_SRC_NOW);
 	rp_AcqStart();
+	//OPtion 1 : pas assez de temps ici
 	rp_AcqStop();
+	rp_AcqAxiGetBufferFillState(RP_CH_1, &fillstate);
+	if (fillstate == true){
+		g_data[4] = 10;
+	}else{
+		g_data[4] = 20;
+	}
 	rp_AcqAxiGetWritePointerAtTrig(RP_CH_1, &pos);
 	float *buff = (float*)malloc(durParameter.Value() * sizeof(float));
+	//Option 2 : probleme de buffer
+	if(buff == NULL)
+		g_data[5] = float(-1);
 	uint32_t size = durParameter.Value();
 	rp_AcqAxiGetDataV(RP_CH_1, pos, &size, buff);
 	g_data2.resize(size);
@@ -140,6 +161,9 @@ void UpdateSignals(void){
 	signalTest[1] = g_data[1];
 	signalTest[2] = float(durParameter.Value());
 	signalTest[3] = g_data[2];
+	signalTest[4] = g_data[3];
+	signalTest[5] = g_data[4];
+	signalTest[6] = g_data[5];
 	
 
 	//changer la taille de input
@@ -161,7 +185,7 @@ void UpdateParams(void){
 	g_data[2] = 0;
 	}
    durParameter.Update();
-   if(durParameter.Value() == 0 || durParameter.Value() > 1024){
+   if(durParameter.Value() == 0 || durParameter.Value() > SIZE_MAX){
 	durParameter.Set(1024);
 	durParameter.Update();
    }
@@ -171,7 +195,7 @@ void UpdateParams(void){
 
    if(startAcq.Value() == false)
    {
-	rp_DpinSetState(RP_LED0, RP_LOW);
+	//rp_DpinSetState(RP_LED0, RP_LOW);
 	g_data[0] = 0.0f;
 	//rp_AcqStop();
 	//doit changer une variable local au prog pour actionner la prise de données dans UpdateSignals
@@ -182,6 +206,7 @@ void UpdateParams(void){
 	g_data[0] = 1.0f;
    	//rp_AcqStart();
 	test_AXI();
+	startAcq.Set(false); //single ACQ
    }
 }
 
